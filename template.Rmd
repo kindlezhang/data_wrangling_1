@@ -1,0 +1,140 @@
+---
+title: "Simple document"
+output: html_document
+---
+
+```{r setup}
+library(tidyverse)
+```
+
+I'm an R Markdown document! 
+
+# the address
+
+if the file and pro is in the same document, you can use name directly
+
+```{r}
+getwd()
+my_data = read.csv(file = "FAS_litters.csv")
+```
+or you can use some shorthand notation
+* ~       Home directory
+* .       Current working directory
+* ..      One directory up from current working directory
+* ../..   Two directories up from current working directory
+
+or u can just use a absolute address
+
+```{r}
+my_data2 = read.csv("./data_import_examples/data_import_examples/FAS_litters.csv")
+my_data3 = read.csv("../data_wrangling_1/data_import_examples/data_import_examples/FAS_litters.csv")
+```
+
+# Section 2
+
+This function call also prints information about the column parsing. 
+
+```{r}
+my_data = read_csv("FAS_litters.csv")
+```
+
+ use `janitor::clean_names()` to clean up variable names after importing data. Doing so will take whatever the column names are and convert them to lower snake case.
+
+```{r}
+names(my_data)
+my_data = janitor::clean_names(my_data)
+names(my_data)
+```
+
+The `package::function` syntax lets you use a function from a package without loading the whole library. That’s really helpful, because some packages have functions with the same name.
+
+# view the data
+
+```{r}
+my_data
+view(my_data)
+head(my_data)
+tail(my_data, n = 5)
+skimr::skim(my_data)
+```
+
+read_* function:
+* col_names: usually TRUE. If FALSE, column names are X1, X1, … . You can also supply column names.
+* na: string vector containing character expressions for missing values.
+* skip: number of rows to skip before reading data.
+
+```{r}
+litters_data = read_csv(file = "FAS_litters.csv",
+  skip = 10, col_names = FALSE, na = c(" ", "NA"))
+```
+you can  give explicit column specifications
+
+```{r}
+litters_data = read_csv(file = "FAS_litters.csv",
+  col_types = cols(
+    Group = col_character(),
+    `Litter Number` = col_character(),
+    `GD0 weight` = col_character(),
+    `GD18 weight` = col_double(),
+    `GD of Birth` = col_integer(),
+    `Pups born alive` = col_integer(),
+    `Pups dead @ birth` = col_integer(),
+    `Pups survive` = col_integer()
+  )
+)
+tail(litters_data)
+```
+
+Note that you don’t have to specify the variable type for every column, and can only focus on ones that are difficult:
+
+```{r}
+litters_data = read_csv(file = "FAS_litters.csv",
+  col_types = cols(
+    Group = col_factor()
+  )
+)
+head(litters_data)
+```
+
+# other file formats
+
+excel
+
+```{r}
+library(readxl)
+mlb11_data = read_excel("mlb11.xlsx", n_max = 20)
+head(mlb11_data, 5)
+```
+
+SAS
+
+```{r}
+library(haven)
+pulse_data = read_sas("public_pulse_data.sas7bdat")
+head(pulse_data, 5)
+```
+
+# Base R ...
+
+don't do this
+
+In short, `read_csv` produces tibbles which are very similar to the base R data frames produced by `read.csv`. However, tibbles have some features that can help prevent mistakes and unwanted behavior.
+
+```{r}
+pups_base = read.csv("FAS_pups.csv")
+pups_readr = read_csv("FAS_pups.csv")
+
+View(pups_base)
+View(pups_readr)
+
+pups_base
+pups_readr
+
+pups_base$Sex
+pups_readr$Sex
+```
+
+# Export data
+
+As a final point, you will sometimes need to export data after you have imported and cleaned it. The `write_*` functions in `readr` address this problem.
+
