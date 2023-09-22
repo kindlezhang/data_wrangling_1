@@ -1,0 +1,120 @@
+---
+title: "data_manipulation"
+author: "kindle zhang"
+date: "2023-09-22"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+```
+
+## import data
+
+```{r }
+options(tibble.print_min = 3)
+
+litters_data = read_csv("FAS_litters.csv",  # another method to issue the type
+  col_types = "ccddiiii")
+litters_data = janitor::clean_names(litters_data)
+
+pups_data = read_csv("FAS_pups.csv",
+  col_types = "ciiiii")
+pups_data = janitor::clean_names(pups_data)
+```
+
+## select
+
+```{r }
+select(litters_data, group, litter_number, gd0_weight, pups_born_alive)
+
+select(litters_data, group:gd_of_birth)
+
+select(litters_data, gd0_weight, group)
+
+select(litters_data, group, starts_with("pups"))  # you can also use ends_with(), contains()
+
+select(litters_data, -pups_survive)
+
+select(litters_data, GROUP = group, LiTtEr_NuMbEr = litter_number)
+
+select(litters_data, GROUP = group, LiTtEr_NuMbEr = litter_number, everything())  # you can also use the `rename()`
+
+select(litters_data, pups_born_alive, everything())
+```
+
+## `select` vs `pull`
+
+```{r}
+data1 = select(litters_data, group)
+data2 = pull(litters_data, group)
+```
+## rename and relocate
+
+```{r}
+rename(litters_data, GROUP = group, LiTtEr_NuMbEr = litter_number)
+
+relocate(litters_data, litter_number, pups_survive)
+```
+
+## filter
+
+```{r}
+filter(litters_data, gd_of_birth == 20)
+
+filter(litters_data, pups_born_alive >= 2)
+
+filter(litters_data, pups_survive != 4)
+
+filter(litters_data, !(pups_survive == 4))
+
+filter(litters_data, group %in% c("Con7", "Con8"))
+
+filter(litters_data, group == "Con7"| group == "Con8")
+
+filter(litters_data, group == "Con7" & gd_of_birth == 20)
+```
+## drop
+
+```{r}
+filter(litters_data, !is.na(gd0_weight))
+drop_na(litters_data)  # remove any row with a missing value
+drop_na(litters_data, gd0_weight)  # remove rows for which `x` is missing
+```
+
+## mutate
+
+```{r}
+mutate(litters_data,
+  wt_gain = gd18_weight - gd0_weight,
+  group = str_to_lower(group)
+)
+```
+
+## arrange
+
+sort the variable
+
+```{r}
+head(arrange(litters_data, pups_born_alive), 10)
+head(arrange(litters_data, group, pups_born_alive), 10)
+```
+
+## pipe : %>%
+
+ctrl + shift + M
+
+```{r}
+litters_data = 
+  read_csv("FAS_litters.csv", col_types = "ccddiiii") |> 
+  janitor::clean_names() |> 
+  select(-pups_survive) |> 
+  mutate(
+    wt_gain = gd18_weight - gd0_weight,
+    group = str_to_lower(group)) |> 
+  drop_na(wt_gain) |> 
+  arrange(group, wt_gain)
+
+litters_data
+```
+
