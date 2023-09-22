@@ -100,9 +100,10 @@ head(arrange(litters_data, pups_born_alive), 10)
 head(arrange(litters_data, group, pups_born_alive), 10)
 ```
 
-## pipe : %>%
+## pipe : %>% & |> 
 
 ctrl + shift + M
+|> : it won’t be familiar to everyone and can’t be used at all in older versions of R
 
 ```{r}
 litters_data = 
@@ -117,4 +118,13 @@ litters_data =
 
 litters_data
 ```
+
+Here, using the placeholder `_` is necessary to indicate where the object being piped should go.
+
+```{r}
+litters_data |>
+  lm(wt_gain ~ pups_born_alive, data = _) |>
+  broom::tidy()
+```
+
 
